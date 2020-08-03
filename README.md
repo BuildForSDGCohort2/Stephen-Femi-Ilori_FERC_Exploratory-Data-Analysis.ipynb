@@ -1,578 +1,278 @@
 # Stephen-Femi-Ilori_FERC_Exploratory-Data-Analysis.ipynb
-<!DOCTYPE HTML>
-<html>
 
-<head>
-    <meta charset="utf-8">
+# importing required packages for data manipulation
 
-    <title>Jupyter Notebook</title>
-    <link id="favicon" rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon-notebook.ico?v=9e5fb7f8501d94094806320e718be6b3">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <link rel="stylesheet" href="/static/components/jquery-ui/themes/smoothness/jquery-ui.min.css?v=3c2a865c832a1322285c55c6ed99abb2" type="text/css" />
-    <link rel="stylesheet" href="/static/components/jquery-typeahead/dist/jquery.typeahead.min.css?v=7afb461de36accb1aa133a1710f5bc56" type="text/css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    
+import pandas as pd
+import dataframe as df
+import numpy as np
+import seaborn as sns
+from sklearn.preprocessing import MinMaxScaler
+
+from sklearn.feature_selection import RFE
+from sklearn.ensemble import ExtraTreesRegressor
 
 
-<script type="text/javascript" src="/static/components/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML-full,Safe&delayStartupUntil=configured" charset="utf-8"></script>
-
-<script type="text/javascript">
-// MathJax disabled, set as null to distinguish from *missing* MathJax,
-// where it will be undefined, and should prompt a dialog later.
-window.mathjax_url = "/static/components/MathJax/MathJax.js";
-</script>
-
-<link rel="stylesheet" href="/static/components/bootstrap-tour/build/css/bootstrap-tour.min.css?v=d0b3c2fce6056a2ddd5a4513762a94c4" type="text/css" />
-<link rel="stylesheet" href="/static/components/codemirror/lib/codemirror.css?v=288352df06a67ee35003b0981da414ac">
-
-
-    <link rel="stylesheet" href="/static/style/style.min.css?v=e91a43337d7c294cc9fab2938fa723b3" type="text/css"/>
-    
-
-<link rel="stylesheet" href="/static/notebook/css/override.css?v=e6f18013b8771987812e992b38ec3318" type="text/css" />
-<link rel="stylesheet" href=""  id='kernel-css'                             type="text/css" />
-
-
-    <link rel="stylesheet" href="/custom/custom.css" type="text/css" />
-    <script src="/static/components/es6-promise/promise.min.js?v=f004a16cb856e0ff11781d01ec5ca8fe" type="text/javascript" charset="utf-8"></script>
-    <script src="/static/components/react/react.production.min.js?v=34f96ffc962a7deecc83037ccb582b58" type="text/javascript"></script>
-    <script src="/static/components/react/react-dom.production.min.js?v=b14d91fb641317cda38dbc9dbf985ab4" type="text/javascript"></script>
-    <script src="/static/components/create-react-class/index.js?v=94feb9971ce6d26211729abc43f96cd2" type="text/javascript"></script>
-    <script src="/static/components/requirejs/require.js?v=951f856e81496aaeec2e71a1c2c0d51f" type="text/javascript" charset="utf-8"></script>
-    <script>
-      require.config({
-          
-          urlArgs: "v=20200803122812",
-          
-          baseUrl: '/static/',
-          paths: {
-            'auth/js/main': 'auth/js/main.min',
-            custom : '/custom',
-            nbextensions : '/nbextensions',
-            kernelspecs : '/kernelspecs',
-            underscore : 'components/underscore/underscore-min',
-            backbone : 'components/backbone/backbone-min',
-            jed: 'components/jed/jed',
-            jquery: 'components/jquery/jquery.min',
-            json: 'components/requirejs-plugins/src/json',
-            text: 'components/requirejs-text/text',
-            bootstrap: 'components/bootstrap/dist/js/bootstrap.min',
-            bootstraptour: 'components/bootstrap-tour/build/js/bootstrap-tour.min',
-            'jquery-ui': 'components/jquery-ui/jquery-ui.min',
-            moment: 'components/moment/min/moment-with-locales',
-            codemirror: 'components/codemirror',
-            termjs: 'components/xterm.js/xterm',
-            typeahead: 'components/jquery-typeahead/dist/jquery.typeahead.min',
-          },
-          map: { // for backward compatibility
-              "*": {
-                  "jqueryui": "jquery-ui",
-              }
-          },
-          shim: {
-            typeahead: {
-              deps: ["jquery"],
-              exports: "typeahead"
-            },
-            underscore: {
-              exports: '_'
-            },
-            backbone: {
-              deps: ["underscore", "jquery"],
-              exports: "Backbone"
-            },
-            bootstrap: {
-              deps: ["jquery"],
-              exports: "bootstrap"
-            },
-            bootstraptour: {
-              deps: ["bootstrap"],
-              exports: "Tour"
-            },
-            "jquery-ui": {
-              deps: ["jquery"],
-              exports: "$"
-            }
-          },
-          waitSeconds: 30,
-      });
-
-      require.config({
-          map: {
-              '*':{
-                'contents': 'services/contents',
-              }
-          }
-      });
-
-      // error-catching custom.js shim.
-      define("custom", function (require, exports, module) {
-          try {
-              var custom = require('custom/custom');
-              console.debug('loaded custom.js');
-              return custom;
-          } catch (e) {
-              console.error("error loading custom.js", e);
-              return {};
-          }
-      })
-
-    document.nbjs_translations = {"domain": "nbjs", "locale_data": {"nbjs": {"": {"domain": "nbjs"}}}};
-    document.documentElement.lang = navigator.language.toLowerCase();
-    </script>
-
-    
-    
-
-</head>
-
-<body class="notebook_app "
  
+import matplotlib.pyplot as plt
+from pandas.tools.plotting import scatter_matrix
 
-
-  
-    data-jupyter-api-token="6cb683df882f543e6bb5b95f5f560aaf27b351d33f196fea"
-  
- 
-data-base-url="/"
-data-ws-url=""
-data-notebook-name="Stephen%20Femi%20Ilori_FERC_Exploratory%20Data%20Analysis.ipynb"
-data-notebook-path="Stephen%20Femi%20Ilori_FERC_Exploratory%20Data%20Analysis.ipynb"
-
-dir="ltr">
-
-<noscript>
-    <div id='noscript'>
-      Jupyter Notebook requires JavaScript.<br>
-      Please enable it to proceed. 
-  </div>
-</noscript>
-
-<div id="header" role="navigation" aria-label="Top Menu">
-  <div id="header-container" class="container">
-  <div id="ipython_notebook" class="nav navbar-brand"><a href="/tree?token=6cb683df882f543e6bb5b95f5f560aaf27b351d33f196fea" title='dashboard'>
-      <img src='/static/base/images/logo.png?v=641991992878ee24c6f3826e81054a0f' alt='Jupyter Notebook'/>
-  </a></div>
-
-  
-
-
-<span id="save_widget" class="save_widget">
-    <span id="notebook_name" class="filename"></span>
-    <span class="checkpoint_status"></span>
-    <span class="autosave_status"></span>
-</span>
-
-
-  
-
-<span id="kernel_logo_widget">
-  
-  <img class="current_kernel_logo" alt="Current Kernel Logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/>
-  
-</span>
-
-
-  
-  
-  
-  
-
-    <span id="login_widget">
-      
-        <button id="logout" class="btn btn-sm navbar-btn">Logout</button>
-      
-    </span>
-
-  
-
-  
-  
-  </div>
-  <div class="header-bar"></div>
-
-  
-<div id="menubar-container" class="container">
-<div id="menubar">
-    <div id="menus" class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
-            <button type="button" class="btn btn-default navbar-btn navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-              <i class="fa fa-bars"></i>
-              <span class="navbar-text">Menu</span>
-            </button>
-            <p id="kernel_indicator" class="navbar-text indicator_area">
-              <span class="kernel_indicator_name">Kernel</span>
-              <i id="kernel_indicator_icon"></i>
-            </p>
-            <i id="readonly-indicator" class="navbar-text" title='This notebook is read-only'>
-                <span class="fa-stack">
-                    <i class="fa fa-save fa-stack-1x"></i>
-                    <i class="fa fa-ban fa-stack-2x text-danger"></i>
-                </span>
-            </i>
-            <i id="modal_indicator" class="navbar-text"></i>
-            <span id="notification_area"></span>
-            <div class="navbar-collapse collapse">
-              <ul class="nav navbar-nav">
-                <li class="dropdown"><a href="#" id="filelink" aria-haspopup="true" aria-controls="file_menu class="dropdown-toggle" data-toggle="dropdown">File</a>
-                    <ul id="file_menu" class="dropdown-menu" role="menu" aria-labelledby="filelink">
-                        <li id="new_notebook" class="dropdown-submenu" role="none">
-                            <a href="#" role="menuitem">New Notebook<span class="sr-only">Toggle Dropdown</span></a>
-                            <ul class="dropdown-menu" id="menu-new-notebook-submenu"></ul>
-                        </li>
-                        <li id="open_notebook" role="none"
-                            title="Opens a new window with the Dashboard view">
-                            <a href="#" role="menuitem">Open...</a></li>
-                        <!-- <hr/> -->
-                        <li class="divider" role="none"></li>
-                        <li id="copy_notebook" role="none"
-                            title="Open a copy of this notebook's contents and start a new kernel">
-                            <a href="#" role="menuitem">Make a Copy...</a></li>
-                        <li id="save_notebook_as" role="none"
-                            title="Save a copy of the notebook's contents and start a new kernel">
-                            <a href="#" role="menuitem">Save as...</a></li>
-                        <li id="rename_notebook" role="none"><a href="#" role="menuitem">Rename...</a></li>
-                        <li id="save_checkpoint" role="none"><a href="#" role="menuitem">Save and Checkpoint</a></li>
-                        <!-- <hr/> -->
-                        <li class="divider" role="none"></li>
-                        <li id="restore_checkpoint" class="dropdown-submenu" role="none"><a href="#" role="menuitem">Revert to Checkpoint<span class="sr-only">Toggle Dropdown</span></a>
-                          <ul class="dropdown-menu">
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                          </ul>
-                        </li>
-                        <li class="divider" role="none"></li>
-                        <li id="print_preview" role="none"><a href="#" role="menuitem">Print Preview</a></li>
-                        <li class="dropdown-submenu" role="none"><a href="#" role="menuitem">Download as<span class="sr-only">Toggle Dropdown</span></a>
-                            <ul id="download_menu" class="dropdown-menu">
-                                
-                                <li id="download_asciidoc">
-                                    <a href="#">AsciiDoc (.asciidoc)</a>
-                                </li>
-                                
-                                <li id="download_html">
-                                    <a href="#">HTML (.html)</a>
-                                </li>
-                                
-                                <li id="download_latex">
-                                    <a href="#">LaTeX (.tex)</a>
-                                </li>
-                                
-                                <li id="download_markdown">
-                                    <a href="#">Markdown (.md)</a>
-                                </li>
-                                
-                                <li id="download_notebook">
-                                    <a href="#">Notebook (.ipynb)</a>
-                                </li>
-                                
-                                <li id="download_pdf">
-                                    <a href="#">PDF via LaTeX (.pdf)</a>
-                                </li>
-                                
-                                <li id="download_rst">
-                                    <a href="#">reST (.rst)</a>
-                                </li>
-                                
-                                <li id="download_script">
-                                    <a href="#">Script (.txt)</a>
-                                </li>
-                                
-                                <li id="download_slides">
-                                    <a href="#">Reveal.js slides (.slides.html)</a>
-                                </li>
-                                
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu hidden" role="none"><a href="#" role="menuitem">Deploy as</a>
-                            <ul id="deploy_menu" class="dropdown-menu"></ul>
-                        </li>
-                        <li class="divider" role="none"></li>
-                        <li id="trust_notebook" role="none"
-                            title="Trust the output of this notebook">
-                            <a href="#" role="menuitem">Trust Notebook</a></li>
-                        <li class="divider" role="none"></li>
-                        <li id="close_and_halt" role="none"
-                            title="Shutdown this notebook's kernel, and close this window">
-                            <a href="#" role="menuitem">Close and Halt</a></li>
-                    </ul>
-                </li>
-
-                <li class="dropdown"><a href="#" class="dropdown-toggle" id="editlink" data-toggle="dropdown" aria-haspopup="true" aria-controls="edit_menu">Edit</a>
-                    <ul id="edit_menu" class="dropdown-menu" role="menu" aria-labelledby="editlink">
-                        <li id="cut_cell" role="none"><a href="#" role="menuitem">Cut Cells</a></li>
-                        <li id="copy_cell" role="none"><a href="#" role="menuitem">Copy Cells</a></li>
-                        <li id="paste_cell_above" class="disabled" role="none"><a href="#" role="menuitem" aria-disabled="true">Paste Cells Above</a></li>
-                        <li id="paste_cell_below" class="disabled" role="none"><a href="#" role="menuitem" aria-disabled="true">Paste Cells Below</a></li>
-                        <li id="paste_cell_replace" class="disabled" role="none"><a href="#" role="menuitem" aria-disabled="true">Paste Cells &amp; Replace</a></li>
-                        <li id="delete_cell" role="none"><a href="#" role="menuitem">Delete Cells</a></li>
-                        <li id="undelete_cell" class="disabled" role="none"><a href="#" role="menuitem" aria-disabled="true">Undo Delete Cells</a></li>
-                        <li class="divider" role="none"></li>
-                        <li id="split_cell" role="none"><a href="#" role="menuitem">Split Cell</a></li>
-                        <li id="merge_cell_above" role="none"><a href="#" role="menuitem">Merge Cell Above</a></li>
-                        <li id="merge_cell_below" role="none"><a href="#" role="menuitem">Merge Cell Below</a></li>
-                        <li class="divider" role="none"></li>
-                        <li id="move_cell_up" role="none"><a href="#" role="menuitem">Move Cell Up</a></li>
-                        <li id="move_cell_down" role="none"><a href="#" role="menuitem">Move Cell Down</a></li>
-                        <li class="divider" role="none"></li>
-                        <li id="edit_nb_metadata" role="none"><a href="#" role="menuitem">Edit Notebook Metadata</a></li>
-                        <li class="divider" role="none"></li>
-                        <li id="find_and_replace" role="none"><a href="#" role="menuitem"> Find and Replace </a></li>
-                        <li class="divider" role="none"></li>
-                        <li id="cut_cell_attachments" role="none"><a href="#" role="menuitem">Cut Cell Attachments</a></li>
-                        <li id="copy_cell_attachments" role="none"><a href="#" role="menuitem">Copy Cell Attachments</a></li>
-                        <li id="paste_cell_attachments"  class="disabled" role="none"><a href="#" role="menuitem" aria-disabled="true">Paste Cell Attachments</a></li>
-                        <li class="divider" role="none"></li>
-                        <li id="insert_image" class="disabled" role="none"><a href="#" role="menuitem" aria-disabled="true">  Insert Image </a></li>
-                    </ul>
-                </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" id="viewlink" data-toggle="dropdown" aria-haspopup="true" aria-controls="view_menu">View</a>
-                    <ul id="view_menu" class="dropdown-menu" role="menu" aria-labelledby="viewlink">
-                        <li id="toggle_header" role="none"
-                            title="Show/Hide the logo and notebook title (above menu bar)">
-                            <a href="#" role="menuitem">Toggle Header</a>
-                        </li>
-                        <li id="toggle_toolbar" role="none"
-                            title="Show/Hide the action icons (below menu bar)">
-                            <a href="#" role="menuitem">Toggle Toolbar</a>
-                        </li>
-                        <li id="toggle_line_numbers" role="none"
-                            title="Show/Hide line numbers in cells">
-                            <a href="#" role="menuitem">Toggle Line Numbers</a>
-                        </li>
-                        <li id="menu-cell-toolbar" class="dropdown-submenu" role="none">
-                            <a href="#" role="menuitem">Cell Toolbar</a>
-                            <ul class="dropdown-menu" id="menu-cell-toolbar-submenu"></ul>
-                        </li>
-                    </ul>
-                </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" id="insertlink" data-toggle="dropdown" aria-haspopup="true" aria-controls="insert_menu">Insert</a>
-                    <ul id="insert_menu" class="dropdown-menu" role="menu" aria-labelledby="insertlink">
-                        <li id="insert_cell_above" role="none"
-                            title="Insert an empty Code cell above the currently active cell">
-                            <a href="#" role="menuitem">Insert Cell Above</a></li>
-                        <li id="insert_cell_below" role="none"
-                            title="Insert an empty Code cell below the currently active cell">
-                            <a href="#" role="menuitem">Insert Cell Below</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Cell</a>
-                    <ul id="cell_menu" class="dropdown-menu">
-                        <li id="run_cell" title="Run this cell, and move cursor to the next one">
-                            <a href="#">Run Cells</a></li>
-                        <li id="run_cell_select_below" title="Run this cell, select below">
-                            <a href="#">Run Cells and Select Below</a></li>
-                        <li id="run_cell_insert_below" title="Run this cell, insert below">
-                            <a href="#">Run Cells and Insert Below</a></li>
-                        <li id="run_all_cells" title="Run all cells in the notebook">
-                            <a href="#">Run All</a></li>
-                        <li id="run_all_cells_above" title="Run all cells above (but not including) this cell">
-                            <a href="#">Run All Above</a></li>
-                        <li id="run_all_cells_below" title="Run this cell and all cells below it">
-                            <a href="#">Run All Below</a></li>
-                        <li class="divider"></li>
-                        <li id="change_cell_type" class="dropdown-submenu"
-                            title="All cells in the notebook have a cell type. By default, new cells are created as 'Code' cells">
-                            <a href="#">Cell Type</a>
-                            <ul class="dropdown-menu">
-                              <li id="to_code"
-                                  title="Contents will be sent to the kernel for execution, and output will display in the footer of cell">
-                                  <a href="#">Code</a></li>
-                              <li id="to_markdown"
-                                  title="Contents will be rendered as HTML and serve as explanatory text">
-                                  <a href="#">Markdown</a></li>
-                              <li id="to_raw"
-                                  title="Contents will pass through nbconvert unmodified">
-                                  <a href="#">Raw NBConvert</a></li>
-                            </ul>
-                        </li>
-                        <li class="divider"></li>
-                        <li id="current_outputs" class="dropdown-submenu"><a href="#">Current Outputs</a>
-                            <ul class="dropdown-menu">
-                                <li id="toggle_current_output"
-                                    title="Hide/Show the output of the current cell">
-                                    <a href="#">Toggle</a>
-                                </li>
-                                <li id="toggle_current_output_scroll"
-                                    title="Scroll the output of the current cell">
-                                    <a href="#">Toggle Scrolling</a>
-                                </li>
-                                <li id="clear_current_output"
-                                    title="Clear the output of the current cell">
-                                    <a href="#">Clear</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li id="all_outputs" class="dropdown-submenu"><a href="#">All Output</a>
-                            <ul class="dropdown-menu">
-                                <li id="toggle_all_output"
-                                    title="Hide/Show the output of all cells">
-                                    <a href="#">Toggle</a>
-                                </li>
-                                <li id="toggle_all_output_scroll"
-                                    title="Scroll the output of all cells">
-                                    <a href="#">Toggle Scrolling</a>
-                                </li>
-                                <li id="clear_all_output"
-                                    title="Clear the output of all cells">
-                                    <a href="#">Clear</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Kernel</a>
-                    <ul id="kernel_menu" class="dropdown-menu">
-                        <li id="int_kernel"
-                            title="Send Keyboard Interrupt (CTRL-C) to the Kernel">
-                            <a href="#">Interrupt</a>
-                        </li>
-                        <li id="restart_kernel"
-                            title="Restart the Kernel">
-                            <a href="#">Restart</a>
-                        </li>
-                        <li id="restart_clear_output"
-                            title="Restart the Kernel and clear all output">
-                            <a href="#">Restart &amp; Clear Output</a>
-                        </li>
-                        <li id="restart_run_all"
-                            title="Restart the Kernel and re-run the notebook">
-                            <a href="#">Restart &amp; Run All</a>
-                        </li>
-                        <li id="reconnect_kernel"
-                            title="Reconnect to the Kernel">
-                            <a href="#">Reconnect</a>
-                        </li>
-                        <li id="shutdown_kernel"
-                            title="Shutdown the Kernel">
-                            <a href="#">Shutdown</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li id="menu-change-kernel" class="dropdown-submenu">
-                            <a href="#">Change kernel</a>
-                            <ul class="dropdown-menu" id="menu-change-kernel-submenu"></ul>
-                        </li>
-                    </ul>
-                </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Help</a>
-                    <ul  id="help_menu" class="dropdown-menu">
-                        
-                        <li id="notebook_tour" title="A quick tour of the notebook user interface"><a href="#">User Interface Tour</a></li>
-                        <li id="keyboard_shortcuts" title="Opens a tooltip with all keyboard shortcuts"><a href="#">Keyboard Shortcuts</a></li>
-                        <li id="edit_keyboard_shortcuts" title="Opens a dialog allowing you to edit Keyboard shortcuts"><a href="#">Edit Keyboard Shortcuts</a></li>
-                        <li class="divider"></li>
-                        
-
-						
-                        
-                            
-                                <li><a rel="noreferrer" href="http://nbviewer.jupyter.org/github/ipython/ipython/blob/3.x/examples/Notebook/Index.ipynb" target="_blank" title="Opens in a new window">
-                                
-                                    <i class="fa fa-external-link menu-icon pull-right"></i>
-                                
-
-                                Notebook Help
-                                </a></li>
-                            
-                                <li><a rel="noreferrer" href="https://help.github.com/articles/markdown-basics/" target="_blank" title="Opens in a new window">
-                                
-                                    <i class="fa fa-external-link menu-icon pull-right"></i>
-                                
-
-                                Markdown
-                                </a></li>
-                            
-                            
-                        
-                        <li class="divider"></li>
-                        <li title="About Jupyter Notebook"><a id="notebook_about" href="#">About</a></li>
-                        
-                    </ul>
-                </li>
-              </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="maintoolbar" class="navbar">
-  <div class="toolbar-inner navbar-inner navbar-nobg">
-    <div id="maintoolbar-container" class="container"></div>
-  </div>
-</div>
-</div>
-
-<div class="lower-header-bar"></div>
-
-</div>
-
-<div id="site">
-
-
-<div id="ipython-main-app">
-    <div id="notebook_panel">
-        <div id="notebook"></div>
-        <div id='tooltip' class='ipython_tooltip' style='display:none'></div>
-    </div>
-</div>
+from sklearn import cross_validation
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import ElasticNet
+from sklearn.ensemble import BaggingRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
 
 
 
-</div>
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
+from keras.utils import np_utils
+from sklearn.model_selection import StratifiedKFold
+from keras.constraints import maxnorm
+#from sklearn.metrics import explained_variance_score
+#from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
+---------------------------------------------------------------------------
+ModuleNotFoundError                       Traceback (most recent call last)
+<ipython-input-38-c7921356e009> in <module>
+      2 
+      3 import pandas as pd
+----> 4 import dataframe as df
+      5 import numpy as np
+      6 import seaborn as sns
+
+ModuleNotFoundError: No module named 'dataframe'
+# extending the number of viewable columns
+
+pd.options.display.max_columns = 40
+# loading the dataset
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00242/ENB2012_data.xlsx"
+energy_data = pd.read_excel(url, error_bad_lines=False)
+energy_data.describe(include='all')
+X1	X2	X3	X4	X5	X6	X7	X8	Y1	Y2
+count	768.000000	768.000000	768.000000	768.000000	768.00000	768.000000	768.000000	768.00000	768.000000	768.000000
+mean	0.764167	671.708333	318.500000	176.604167	5.25000	3.500000	0.234375	2.81250	22.307195	24.587760
+std	0.105777	88.086116	43.626481	45.165950	1.75114	1.118763	0.133221	1.55096	10.090204	9.513306
+min	0.620000	514.500000	245.000000	110.250000	3.50000	2.000000	0.000000	0.00000	6.010000	10.900000
+25%	0.682500	606.375000	294.000000	140.875000	3.50000	2.750000	0.100000	1.75000	12.992500	15.620000
+50%	0.750000	673.750000	318.500000	183.750000	5.25000	3.500000	0.250000	3.00000	18.950000	22.080000
+75%	0.830000	741.125000	343.000000	220.500000	7.00000	4.250000	0.400000	4.00000	31.667500	33.132500
+max	0.980000	808.500000	416.500000	220.500000	7.00000	5.000000	0.400000	5.00000	43.100000	48.030000
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00242/ENB2012_data.xlsx"
+energy_data = pd.read_excel(url)
+energy_data.describe()
+df = pd.read_excel("https://archive.ics.uci.edu/ml/machine-learning-databases/00242/ENB2012_data.xlsx", )
+df.head()
+X1	X2	X3	X4	X5	X6	X7	X8	Y1	Y2
+0	0.98	514.5	294.0	110.25	7.0	2	0.0	0	15.55	21.33
+1	0.98	514.5	294.0	110.25	7.0	3	0.0	0	15.55	21.33
+2	0.98	514.5	294.0	110.25	7.0	4	0.0	0	15.55	21.33
+3	0.98	514.5	294.0	110.25	7.0	5	0.0	0	15.55	21.33
+4	0.90	563.5	318.5	122.50	7.0	2	0.0	0	20.84	28.28
+# dataset info
+
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 768 entries, 0 to 767
+Data columns (total 10 columns):
+X1    768 non-null float64
+X2    768 non-null float64
+X3    768 non-null float64
+X4    768 non-null float64
+X5    768 non-null float64
+X6    768 non-null int64
+X7    768 non-null float64
+X8    768 non-null int64
+Y1    768 non-null float64
+Y2    768 non-null float64
+dtypes: float64(8), int64(2)
+memory usage: 60.1 KB
+#rename columns to match description given us
+column_names = {'X1':'Relative_Compactness', 'X2': 'Surface_Area',
+'X3': 'Wall_Area', 'X4': 'Roof_Area', 'X5': 'Overall_Height',
+'X6': 'Orientation', 'X7': 'Glazing_Area',
+'X8': 'Glazing_Area_Distribution',
+'Y1': 'Heating_Load', 'Y2': 'Cooling_Load'}
+df = df.rename(columns=column_names)
+df.describe(include='all')
+#the Ys are the target variables
+Relative_Compactness	Surface_Area	Wall_Area	Roof_Area	Overall_Height	Orientation	Glazing_Area	Glazing_Area_Distribution	Heating_Load	Cooling_Load
+count	768.000000	768.000000	768.000000	768.000000	768.00000	768.000000	768.000000	768.00000	768.000000	768.000000
+mean	0.764167	671.708333	318.500000	176.604167	5.25000	3.500000	0.234375	2.81250	22.307195	24.587760
+std	0.105777	88.086116	43.626481	45.165950	1.75114	1.118763	0.133221	1.55096	10.090204	9.513306
+min	0.620000	514.500000	245.000000	110.250000	3.50000	2.000000	0.000000	0.00000	6.010000	10.900000
+25%	0.682500	606.375000	294.000000	140.875000	3.50000	2.750000	0.100000	1.75000	12.992500	15.620000
+50%	0.750000	673.750000	318.500000	183.750000	5.25000	3.500000	0.250000	3.00000	18.950000	22.080000
+75%	0.830000	741.125000	343.000000	220.500000	7.00000	4.250000	0.400000	4.00000	31.667500	33.132500
+max	0.980000	808.500000	416.500000	220.500000	7.00000	5.000000	0.400000	5.00000	43.100000	48.030000
+print("Head:", df.head())
+Head:    Relative_Compactness  Surface_Area  Wall_Area  Roof_Area  Overall_Height  \
+0                  0.98         514.5      294.0     110.25             7.0   
+1                  0.98         514.5      294.0     110.25             7.0   
+2                  0.98         514.5      294.0     110.25             7.0   
+3                  0.98         514.5      294.0     110.25             7.0   
+4                  0.90         563.5      318.5     122.50             7.0   
+
+   Orientation  Glazing_Area  Glazing_Area_Distribution  Heating_Load  \
+0            2           0.0                          0         15.55   
+1            3           0.0                          0         15.55   
+2            4           0.0                          0         15.55   
+3            5           0.0                          0         15.55   
+4            2           0.0                          0         20.84   
+
+   Cooling_Load  
+0         21.33  
+1         21.33  
+2         21.33  
+3         21.33  
+4         28.28  
+print("Statistical Description:", df.describe())
+Statistical Description:        Relative_Compactness  Surface_Area   Wall_Area   Roof_Area  \
+count            768.000000    768.000000  768.000000  768.000000   
+mean               0.764167    671.708333  318.500000  176.604167   
+std                0.105777     88.086116   43.626481   45.165950   
+min                0.620000    514.500000  245.000000  110.250000   
+25%                0.682500    606.375000  294.000000  140.875000   
+50%                0.750000    673.750000  318.500000  183.750000   
+75%                0.830000    741.125000  343.000000  220.500000   
+max                0.980000    808.500000  416.500000  220.500000   
+
+       Overall_Height  Orientation  Glazing_Area  Glazing_Area_Distribution  \
+count       768.00000   768.000000    768.000000                  768.00000   
+mean          5.25000     3.500000      0.234375                    2.81250   
+std           1.75114     1.118763      0.133221                    1.55096   
+min           3.50000     2.000000      0.000000                    0.00000   
+25%           3.50000     2.750000      0.100000                    1.75000   
+50%           5.25000     3.500000      0.250000                    3.00000   
+75%           7.00000     4.250000      0.400000                    4.00000   
+max           7.00000     5.000000      0.400000                    5.00000   
+
+       Heating_Load  Cooling_Load  
+count    768.000000    768.000000  
+mean      22.307195     24.587760  
+std       10.090204      9.513306  
+min        6.010000     10.900000  
+25%       12.992500     15.620000  
+50%       18.950000     22.080000  
+75%       31.667500     33.132500  
+max       43.100000     48.030000  
+print("Shape:", df.shape)
+Shape: (768, 10)
+print("Data Types:", df.dtypes)
+Data Types: Relative_Compactness         float64
+Surface_Area                 float64
+Wall_Area                    float64
+Roof_Area                    float64
+Overall_Height               float64
+Orientation                    int64
+Glazing_Area                 float64
+Glazing_Area_Distribution      int64
+Heating_Load                 float64
+Cooling_Load                 float64
+dtype: object
+print("Correlation:", df.corr(method='pearson'))
+Correlation:                            Relative_Compactness  Surface_Area     Wall_Area  \
+Relative_Compactness               1.000000e+00 -9.919015e-01 -2.037817e-01   
+Surface_Area                      -9.919015e-01  1.000000e+00  1.955016e-01   
+Wall_Area                         -2.037817e-01  1.955016e-01  1.000000e+00   
+Roof_Area                         -8.688234e-01  8.807195e-01 -2.923165e-01   
+Overall_Height                     8.277473e-01 -8.581477e-01  2.809757e-01   
+Orientation                        0.000000e+00  0.000000e+00  0.000000e+00   
+Glazing_Area                       1.283986e-17  1.318356e-16 -7.969726e-19   
+Glazing_Area_Distribution          1.764620e-17 -3.558613e-16  0.000000e+00   
+Heating_Load                       6.222719e-01 -6.581199e-01  4.556714e-01   
+Cooling_Load                       6.343391e-01 -6.729989e-01  4.271170e-01   
+
+                              Roof_Area  Overall_Height  Orientation  \
+Relative_Compactness      -8.688234e-01    8.277473e-01     0.000000   
+Surface_Area               8.807195e-01   -8.581477e-01     0.000000   
+Wall_Area                 -2.923165e-01    2.809757e-01     0.000000   
+Roof_Area                  1.000000e+00   -9.725122e-01     0.000000   
+Overall_Height            -9.725122e-01    1.000000e+00     0.000000   
+Orientation                0.000000e+00    0.000000e+00     1.000000   
+Glazing_Area              -1.381805e-16    1.861418e-18     0.000000   
+Glazing_Area_Distribution -1.079129e-16    0.000000e+00     0.000000   
+Heating_Load              -8.618281e-01    8.894305e-01    -0.002587   
+Cooling_Load              -8.625466e-01    8.957852e-01     0.014290   
+
+                           Glazing_Area  Glazing_Area_Distribution  \
+Relative_Compactness       1.283986e-17               1.764620e-17   
+Surface_Area               1.318356e-16              -3.558613e-16   
+Wall_Area                 -7.969726e-19               0.000000e+00   
+Roof_Area                 -1.381805e-16              -1.079129e-16   
+Overall_Height             1.861418e-18               0.000000e+00   
+Orientation                0.000000e+00               0.000000e+00   
+Glazing_Area               1.000000e+00               2.129642e-01   
+Glazing_Area_Distribution  2.129642e-01               1.000000e+00   
+Heating_Load               2.698417e-01               8.736846e-02   
+Cooling_Load               2.075050e-01               5.052512e-02   
+
+                           Heating_Load  Cooling_Load  
+Relative_Compactness           0.622272      0.634339  
+Surface_Area                  -0.658120     -0.672999  
+Wall_Area                      0.455671      0.427117  
+Roof_Area                     -0.861828     -0.862547  
+Overall_Height                 0.889430      0.895785  
+Orientation                   -0.002587      0.014290  
+Glazing_Area                   0.269842      0.207505  
+Glazing_Area_Distribution      0.087368      0.050525  
+Heating_Load                   1.000000      0.975862  
+Cooling_Load                   0.975862      1.000000  
+dataset = df.values
 
 
+X = dataset[:,0:8]
+Y = dataset[:,8]
+Y2 = dataset[:,9]
+#Feature Selection
+model = ExtraTreesRegressor()
+rfe = RFE(model, 3)
+fit = rfe.fit(X, Y)
 
-<div id="pager">
-    <div id="pager-contents">
-        <div id="pager-container" class="container"></div>
-    </div>
-    <div id='pager-button-area'></div>
-</div>
+print("Number of Features: ", fit.n_features_)
+print("Selected Features: ", fit.support_)
+print("Feature Ranking: ", fit.ranking_) 
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+Number of Features:  3
+Selected Features:  [False  True False  True  True False False False]
+Feature Ranking:  [4 1 3 1 1 6 2 5]
+#Feature Selection
+model = ExtraTreesRegressor()
+rfe = RFE(model, 3)
+fit = rfe.fit(X, Y2)
 
-
-
-
-
-
-<script type="text/javascript">
-    sys_info = {"notebook_version": "6.0.1", "notebook_path": "C:\\Users\\hp\\Anaconda3\\lib\\site-packages\\notebook", "commit_source": "", "commit_hash": "", "sys_version": "3.7.4 (default, Aug  9 2019, 18:34:13) [MSC v.1915 64 bit (AMD64)]", "sys_executable": "C:\\Users\\hp\\Anaconda3\\python.exe", "sys_platform": "win32", "platform": "Windows-10-10.0.18362-SP0", "os_name": "nt", "default_encoding": "utf-8"};
-</script>
-
-<script src="/static/components/text-encoding/lib/encoding.js?v=d5bb0fc9ffeff7d98a69bb83daa51052" charset="utf-8"></script>
-
-<script src="/static/notebook/js/main.min.js?v=1bc4ae6ca8730320ff059b16de698691" type="text/javascript" charset="utf-8"></script>
-
-
-
-<script type='text/javascript'>
-  function _remove_token_from_url() {
-    if (window.location.search.length <= 1) {
-      return;
-    }
-    var search_parameters = window.location.search.slice(1).split('&');
-    for (var i = 0; i < search_parameters.length; i++) {
-      if (search_parameters[i].split('=')[0] === 'token') {
-        // remote token from search parameters
-        search_parameters.splice(i, 1);
-        var new_search = '';
-        if (search_parameters.length) {
-          new_search = '?' + search_parameters.join('&');
-        }
-        var new_url = window.location.origin + 
-                      window.location.pathname + 
-                      new_search + 
-                      window.location.hash;
-        window.history.replaceState({}, "", new_url);
-        return;
-      }
-    }
-  }
-  _remove_token_from_url();
-</script>
-</body>
-
-</html>
+print("Number of Features: ", fit.n_features_)
+print("Selected Features: ", fit.support_)
+print("Feature Ranking: ", fit.ranking_) 
+Number of Features:  3
+Selected Features:  [ True False  True False  True False False False]
+Feature Ranking:  [1 3 1 6 1 5 2 4]
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+C:\Users\hp\Anaconda3\lib\site-packages\sklearn\ensemble\forest.py:245: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
